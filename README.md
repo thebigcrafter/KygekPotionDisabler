@@ -1,3 +1,7 @@
+# KygekPotionDisabler
+
+Unregisters and disables default PocketMine-MP regular and splash potion items.
+
 ## TODO:
 
 - [x] Implement regular potions
