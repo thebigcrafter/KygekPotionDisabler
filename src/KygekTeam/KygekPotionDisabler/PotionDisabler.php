@@ -21,6 +21,7 @@ use pocketmine\inventory\CraftingManager;
 use pocketmine\inventory\CraftingRecipe;
 use pocketmine\item\Item;
 use pocketmine\item\ItemFactory;
+use pocketmine\item\ItemIds;
 use pocketmine\item\Potion;
 use pocketmine\item\SplashPotion;
 use pocketmine\lang\TranslationContainer;
@@ -60,7 +61,7 @@ class PotionDisabler extends PluginBase implements Listener {
         if ($command[0] !== "give" || !isset($command[2])) return;
 
         $item = explode(":", str_ireplace("minecraft:", "", $command[2]));
-        $match = ["potion", (string) Item::POTION, "splash_potion", (string) Item::SPLASH_POTION];
+        $match = ["potion", (string) ItemIds::POTION, "splash_potion", (string) ItemIds::SPLASH_POTION];
         if (in_array($item[0], $match)) {
             $event->setCancelled();
             $event->getSender()->sendMessage(
@@ -72,8 +73,8 @@ class PotionDisabler extends PluginBase implements Listener {
     private function removePotionFromCreativeInventory() {
         $meta = 0;
         while ($meta <= self::HIGHEST_META) {
-            Item::removeCreativeItem(ItemFactory::get(Item::POTION, $meta));
-            Item::removeCreativeItem(ItemFactory::get(Item::SPLASH_POTION, $meta));
+            Item::removeCreativeItem(ItemFactory::get(ItemIds::POTION, $meta));
+            Item::removeCreativeItem(ItemFactory::get(ItemIds::SPLASH_POTION, $meta));
             $meta++;
         }
     }
@@ -118,13 +119,13 @@ class PotionDisabler extends PluginBase implements Listener {
             $invTag = $player->getListTag("Inventory");
             $player->setTag(new ListTag("Inventory", array_filter($invTag->getValue(), function (CompoundTag $value) : bool {
                 $id = $value->getValue()["id"]->getValue();
-                return $id !== Item::POTION && $id !== Item::SPLASH_POTION;
+                return $id !== ItemIds::POTION && $id !== ItemIds::SPLASH_POTION;
             }), NBT::TAG_Compound));
 
             $enderChestTag = $player->getListTag("EnderChestInventory");
             $player->setTag(new ListTag("EnderChestInventory", array_filter($enderChestTag->getValue(), function (CompoundTag $value) : bool {
                 $id = $value->getValue()["id"]->getValue();
-                return $id !== Item::POTION && $id !== Item::SPLASH_POTION;
+                return $id !== ItemIds::POTION && $id !== ItemIds::SPLASH_POTION;
             }), NBT::TAG_Compound));
 
             $server->saveOfflinePlayerData($playerName, $player);

@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace KygekTeam\KygekPotionDisabler\tile;
 
 use pocketmine\item\Item;
+use pocketmine\item\ItemIds;
 use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\nbt\tag\ListTag;
 use pocketmine\nbt\tag\StringTag;
@@ -34,7 +35,7 @@ class Chest extends PChest {
             /** @var CompoundTag $itemNBT */
             foreach ($inventoryTag as $itemNBT) {
                 $id = $itemNBT->getValue()["id"]->getValue();
-                if ($id === Item::POTION || $id === Item::SPLASH_POTION) continue;
+                if ($id === ItemIds::POTION || $id === ItemIds::SPLASH_POTION) continue;
                 $inventory->setItem($itemNBT->getByte("Slot"), Item::nbtDeserialize($itemNBT));
             }
         }
