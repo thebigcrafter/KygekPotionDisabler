@@ -1,5 +1,7 @@
 # KygekPotionDisabler
 
+> **NOTE:** This plugin is not planned to be released on Poggit. This plugin is also still in BETA.
+
 Unregisters and disables default PocketMine-MP regular and splash potion items.
 
 ## TODO:
