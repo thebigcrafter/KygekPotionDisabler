@@ -14,33 +14,31 @@ declare(strict_types=1);
 
 namespace KygekTeam\KygekPotionDisabler\tile;
 
+use pocketmine\block\tile\Container;
+use pocketmine\block\tile\ContainerTrait;
 use pocketmine\item\Item;
-use pocketmine\item\ItemIds;
+use pocketmine\item\ItemTypeIds;
 use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\ListTag;
-use pocketmine\nbt\tag\StringTag;
-use pocketmine\tile\Chest as PChest;
-use pocketmine\tile\Container;
-use pocketmine\tile\ContainerTrait;
 
-class Chest extends PChest {
+
+class Chest extends \pocketmine\block\tile\Chest {
 
 	use ContainerTrait;
 
 	protected function loadItems(CompoundTag $tag) : void {
-		if ($tag->hasTag(Container::TAG_ITEMS, ListTag::class)) {
+		if ($tag->getTag(Container::TAG_ITEMS) !== null) {
 			$inventoryTag = $tag->getListTag(Container::TAG_ITEMS);
 
 			$inventory = $this->getRealInventory();
 			/** @var CompoundTag $itemNBT */
 			foreach ($inventoryTag as $itemNBT) {
 				$id = $itemNBT->getValue()["id"]->getValue();
-				if ($id === ItemIds::POTION || $id === ItemIds::SPLASH_POTION) continue;
+				if ($id === ItemTypeIds::POTION || $id === ItemTypeIds::SPLASH_POTION) continue;
 				$inventory->setItem($itemNBT->getByte("Slot"), Item::nbtDeserialize($itemNBT));
 			}
 		}
 
-		if ($tag->hasTag(Container::TAG_LOCK, StringTag::class)) {
+		if ($tag->getTag(Container::TAG_LOCK) !== null) {
 			$this->lock = $tag->getString(Container::TAG_LOCK);
 		}
 	}
