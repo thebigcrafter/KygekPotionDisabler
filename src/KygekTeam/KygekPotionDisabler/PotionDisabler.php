@@ -26,9 +26,6 @@ use pocketmine\item\Potion;
 use pocketmine\item\SplashPotion;
 use pocketmine\item\VanillaItems;
 use pocketmine\lang\Translatable;
-use pocketmine\nbt\NBT;
-use pocketmine\nbt\tag\CompoundTag;
-use pocketmine\nbt\tag\ListTag;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
 use ReflectionException;
@@ -41,20 +38,17 @@ use function in_array;
 use function mb_strtolower;
 use function str_ireplace;
 
-class PotionDisabler extends PluginBase implements Listener
-{
+class PotionDisabler extends PluginBase implements Listener {
 	private const HIGHEST_META = 42;
 
 	/**
 	 * @throws ReflectionException
 	 */
-	public function onEnable() : void
-	{
+	public function onEnable() : void {
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 
 		$this->removePotionFromCreativeInventory();
 		$this->removePotionItems();
-		//$this->removePotionFromInventory();
 
 		$this->removePotionCrafting("shapedRecipes");
 		$this->removePotionCrafting("shapelessRecipes");
@@ -63,8 +57,7 @@ class PotionDisabler extends PluginBase implements Listener
 		$tileFactory->register(Chest::class, ["Chest", "Large Chest"]);
 	}
 
-	public function onGiveCommand(CommandEvent $event) : void
-	{
+	public function onGiveCommand(CommandEvent $event) : void {
 		if ($event->isCancelled())
 			return;
 
@@ -83,8 +76,7 @@ class PotionDisabler extends PluginBase implements Listener
 		}
 	}
 
-	private function removePotionFromCreativeInventory()
-	{
+	private function removePotionFromCreativeInventory() {
 		$creativeInv = CreativeInventory::getInstance();
 
 		$meta = 0;
@@ -95,8 +87,7 @@ class PotionDisabler extends PluginBase implements Listener
 		}
 	}
 
-	private function removePotionItems()
-	{
+	private function removePotionItems() {
 		$reflection = new ReflectionProperty(VanillaItems::class, "list");
 		$reflection->setAccessible(true);
 		$list = $reflection->getValue()->toArray();
@@ -109,8 +100,7 @@ class PotionDisabler extends PluginBase implements Listener
 	/**
 	 * @throws ReflectionException
 	 */
-	private function removePotionCrafting(string $property)
-	{
+	private function removePotionCrafting(string $property) {
 		$reflection = new ReflectionProperty(CraftingManager::class, $property);
 		$reflection->setAccessible(true);
 		$recipes = $reflection->getValue(new CraftingManager());
@@ -129,30 +119,4 @@ class PotionDisabler extends PluginBase implements Listener
 		});
 		$reflection->setValue(new CraftingManager(), $recipes);
 	}
-
-	/**
-	 * Disable temporarily
-	 * private function removePotionFromInventory()
-	 * {
-	 * $server = $this->getServer();
-	 * foreach (array_diff(scandir($server->getDataPath() . "players/"), [".", ".."]) as $playerData) {
-	 * $playerName = basename($playerData, ".dat");
-	 * $player = $server->getOfflinePlayerData($playerName);
-	 *
-	 * $invTag = $player->getListTag("Inventory");
-	 * $player->setTag(new ListTag("Inventory", array_filter($invTag->getValue(), function (CompoundTag $value): bool {
-	 * $id = $value->getValue()["id"]->getValue();
-	 * return $id !== ItemTypeIds::POTION && $id !== ItemTypeIds::SPLASH_POTION;
-	 * }), NBT::TAG_Compound));
-	 *
-	 * $enderChestTag = $player->getListTag("EnderChestInventory");
-	 * $player->setTag(new ListTag("EnderChestInventory", array_filter($enderChestTag->getValue(), function (CompoundTag $value): bool {
-	 * $id = $value->getValue()["id"]->getValue();
-	 * return $id !== ItemTypeIds::POTION && $id !== ItemTypeIds::SPLASH_POTION;
-	 * }), NBT::TAG_Compound));
-	 *
-	 * $server->saveOfflinePlayerData($playerName, $player);
-	 * }
-	 * }*/
-
 }

@@ -20,7 +20,6 @@ use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\nbt\tag\CompoundTag;
 
-
 class Chest extends \pocketmine\block\tile\Chest {
 
 	use ContainerTrait;
