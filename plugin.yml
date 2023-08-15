@@ -9,7 +9,7 @@
 
 name: KygekPotionDisabler
 version: 1.0.0
-author: KygekTeam
+authors: [KygekTeam, thebigcrafter]
 api: 5.0.0
 main: KygekTeam\KygekPotionDisabler\PotionDisabler
 ...
