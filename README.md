@@ -13,22 +13,6 @@ Unregisters and disables default PocketMine-MP regular and splash potion items.
 
 This plugin is not planned to be released on Poggit. This plugin is also still in BETA.
 
-# 📜 TODO
-
-- [x] Implement regular potions
-- [x] Implement splash potions
-- [ ] Code cleanup & refactoring
-  
-
-- [x] Add /give command check for potions
-- [x] Remove potions from creative inventory
-- [x] Remove potions from Shaped and ShapedLess crafting
-  
-
-- [x] Remove potions from all player inventories
-- [x] Remove potions from chests
-- [x] Remove potions from ender chests
-
 # ⚖️ License
 
 Licensed under the [GNU General Public License v3.0 license](https://github.com/thebigcrafter/KygekPotionDisabler/blob/main/LICENSE).
