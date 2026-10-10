@@ -2,10 +2,17 @@
     "name": "thebigcrafter/kygek-potion-disabler",
     "description": "PocketMine-MP plugin that disables regular and splash potions",
     "license": "GPL-3.0-only",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/axolotl-pm/PocketMine-MP",
+            "no-api": true
+        }
+    ],
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.17",
         "phpstan/phpstan": "^2.1",
-        "pocketmine/pocketmine-mp": "^5.0"
+        "axolotl-pm/pocketmine-mp": "dev-stable"
     },
     "require": {},
     "scripts": {
