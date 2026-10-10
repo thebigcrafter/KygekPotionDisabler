@@ -9,9 +9,36 @@
 
 Unregisters and disables default PocketMine-MP regular and splash potion items.
 
+# ✅ Requirements
+
+- PocketMine-MP API 5.0.0 or a compatible API 5 release.
+
+The plugin has no commands or configuration file. When enabled, it removes
+regular and splash potions from the creative inventory, removes crafting
+recipes that use or produce those items, and cancels matching `/give` command
+requests. It also skips potion items while loading the inventory of the
+plugin's chest tile implementation.
+
+This is an enforcement plugin for the server-side item paths covered above;
+it does not replace a permission policy or claim to validate every custom
+plugin that creates or transfers potion items.
+
 # ⚠️ Notice
 
 This plugin is not planned to be released on Poggit. This plugin is also still in BETA.
+
+# 🛠️ Development
+
+Install the locked development dependencies and run the repository checks:
+
+```shell
+composer install
+composer run analyse
+```
+
+Before using a build on a server, verify creative inventory contents, potion
+crafting, `/give` handling and chest loading in an isolated API 5 test server.
+Do not test by changing a production world or its plugin data.
 
 # ⚖️ License
 
