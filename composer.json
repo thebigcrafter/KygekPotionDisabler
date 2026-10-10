@@ -8,11 +8,6 @@
         "pocketmine/pocketmine-mp": "^5.0"
     },
     "require": {},
-    "autoload-dev": {
-        "psr-4": {
-            "thebigcrafter\\Hydrogen\\": "tools/stubs/Hydrogen/"
-        }
-    },
     "scripts": {
         "analyse": "phpstan analyse -c phpstan.neon.dist"
     }

@@ -20,6 +20,7 @@ use pocketmine\crafting\CraftingManager;
 use pocketmine\crafting\CraftingRecipe;
 use pocketmine\crafting\ShapedRecipe;
 use pocketmine\crafting\ShapelessRecipe;
+use pocketmine\data\bedrock\PotionTypeIdMap;
 use pocketmine\event\Listener;
 use pocketmine\event\server\CommandEvent;
 use pocketmine\inventory\CreativeInventory;
@@ -32,7 +33,6 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
 use ReflectionException;
 use ReflectionProperty;
-use thebigcrafter\Hydrogen\utils\StringConverter;
 use function array_filter;
 use function array_walk;
 use function explode;
@@ -51,7 +51,6 @@ class PotionDisabler extends PluginBase implements Listener {
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 
 		$this->removePotionFromCreativeInventory();
-		$this->removePotionItems();
 
 		$this->removePotionCrafting("shapedRecipes");
 		$this->removePotionCrafting("shapelessRecipes");
@@ -84,23 +83,13 @@ class PotionDisabler extends PluginBase implements Listener {
 
 		$meta = 0;
 		while ($meta <= self::HIGHEST_META) {
-			$creativeInv->remove(StringConverter::stringToItem(ItemTypeIds::POTION, $meta));
-			$creativeInv->remove(StringConverter::stringToItem(ItemTypeIds::SPLASH_POTION, $meta));
+			$potionType = PotionTypeIdMap::getInstance()->fromId($meta);
+			if ($potionType !== null) {
+				$creativeInv->remove(VanillaItems::POTION()->setType($potionType));
+				$creativeInv->remove(VanillaItems::SPLASH_POTION()->setType($potionType));
+			}
 			$meta++;
 		}
-	}
-
-	private function removePotionItems() : void {
-		$reflection = new ReflectionProperty(VanillaItems::class, "list");
-		$reflection->setAccessible(true);
-		$list = $reflection->getValue();
-		if (!is_array($list)) {
-			return;
-		}
-		$list = array_filter($list, static function (mixed $item) : bool {
-			return !$item instanceof Potion && !$item instanceof SplashPotion;
-		});
-		$reflection->setValue($list);
 	}
 
 	/**
