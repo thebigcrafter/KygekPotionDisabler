@@ -18,6 +18,8 @@ use KygekTeam\KygekPotionDisabler\tile\Chest;
 use pocketmine\block\tile\TileFactory;
 use pocketmine\crafting\CraftingManager;
 use pocketmine\crafting\CraftingRecipe;
+use pocketmine\crafting\ShapedRecipe;
+use pocketmine\crafting\ShapelessRecipe;
 use pocketmine\event\Listener;
 use pocketmine\event\server\CommandEvent;
 use pocketmine\inventory\CreativeInventory;
@@ -35,6 +37,7 @@ use function array_filter;
 use function array_walk;
 use function explode;
 use function in_array;
+use function is_array;
 use function mb_strtolower;
 use function str_ireplace;
 
@@ -76,7 +79,7 @@ class PotionDisabler extends PluginBase implements Listener {
 		}
 	}
 
-	private function removePotionFromCreativeInventory() {
+	private function removePotionFromCreativeInventory() : void {
 		$creativeInv = CreativeInventory::getInstance();
 
 		$meta = 0;
@@ -87,11 +90,14 @@ class PotionDisabler extends PluginBase implements Listener {
 		}
 	}
 
-	private function removePotionItems() {
+	private function removePotionItems() : void {
 		$reflection = new ReflectionProperty(VanillaItems::class, "list");
 		$reflection->setAccessible(true);
-		$list = $reflection->getValue()->toArray();
-		$list = array_filter($list, function ($item) : bool {
+		$list = $reflection->getValue();
+		if (!is_array($list)) {
+			return;
+		}
+		$list = array_filter($list, static function (mixed $item) : bool {
 			return !$item instanceof Potion && !$item instanceof SplashPotion;
 		});
 		$reflection->setValue($list);
@@ -100,17 +106,32 @@ class PotionDisabler extends PluginBase implements Listener {
 	/**
 	 * @throws ReflectionException
 	 */
-	private function removePotionCrafting(string $property) {
+	private function removePotionCrafting(string $property) : void {
 		$reflection = new ReflectionProperty(CraftingManager::class, $property);
 		$reflection->setAccessible(true);
 		$recipes = $reflection->getValue(new CraftingManager());
-		array_walk($recipes, function (array &$value) {
-			$value = array_filter($value, function (CraftingRecipe $recipe) : bool {
+		if (!is_array($recipes)) {
+			return;
+		}
+		array_walk($recipes, static function (mixed &$value) : void {
+			if (!is_array($value)) {
+				$value = [];
+				return;
+			}
+			$value = array_filter($value, static function (mixed $recipe) : bool {
+				if (!$recipe instanceof CraftingRecipe) {
+					return true;
+				}
 				foreach ($recipe->getIngredientList() as $ingredient) {
 					if ($ingredient instanceof Potion || $ingredient instanceof SplashPotion)
 						return false;
 				}
-				foreach ($recipe->getResults() as $result) {
+				$results = match (true) {
+					$recipe instanceof ShapedRecipe => $recipe->getResults(),
+					$recipe instanceof ShapelessRecipe => $recipe->getResults(),
+					default => []
+				};
+				foreach ($results as $result) {
 					if ($result instanceof Potion || $result instanceof SplashPotion)
 						return false;
 				}

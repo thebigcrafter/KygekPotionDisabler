@@ -27,13 +27,14 @@ class Chest extends \pocketmine\block\tile\Chest {
 	protected function loadItems(CompoundTag $tag) : void {
 		if ($tag->getTag(Container::TAG_ITEMS) !== null) {
 			$inventoryTag = $tag->getListTag(Container::TAG_ITEMS);
-
-			$inventory = $this->getRealInventory();
-			/** @var CompoundTag $itemNBT */
-			foreach ($inventoryTag as $itemNBT) {
-				$id = $itemNBT->getValue()["id"]->getValue();
-				if ($id === ItemTypeIds::POTION || $id === ItemTypeIds::SPLASH_POTION) continue;
-				$inventory->setItem($itemNBT->getByte("Slot"), Item::nbtDeserialize($itemNBT));
+			if ($inventoryTag !== null) {
+				$inventory = $this->getRealInventory();
+				/** @var CompoundTag $itemNBT */
+				foreach ($inventoryTag as $itemNBT) {
+					$id = $itemNBT->getValue()["id"]->getValue();
+					if ($id === ItemTypeIds::POTION || $id === ItemTypeIds::SPLASH_POTION) continue;
+					$inventory->setItem($itemNBT->getByte("Slot"), Item::nbtDeserialize($itemNBT));
+				}
 			}
 		}
 
