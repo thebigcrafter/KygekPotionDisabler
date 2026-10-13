@@ -40,6 +40,9 @@ Before using a build on a server, verify creative inventory contents, potion
 crafting, `/give` handling and chest loading in an isolated API 5 test server.
 Do not test by changing a production world or its plugin data.
 
+The `1.0.2` release also fixes chest NBT loading for the current API 5 item
+format while preserving the existing potion filtering behavior.
+
 # ⚖️ License
 
 Licensed under the [GNU General Public License v3.0 license](https://github.com/thebigcrafter/KygekPotionDisabler#GPL-3.0-1).

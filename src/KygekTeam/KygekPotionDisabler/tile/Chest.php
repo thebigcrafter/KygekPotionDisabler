@@ -16,6 +16,7 @@ namespace KygekTeam\KygekPotionDisabler\tile;
 
 use pocketmine\block\tile\Container;
 use pocketmine\block\tile\ContainerTrait;
+use pocketmine\data\bedrock\item\SavedItemStackData;
 use pocketmine\item\Item;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\nbt\tag\CompoundTag;
@@ -31,9 +32,10 @@ class Chest extends \pocketmine\block\tile\Chest {
 				$inventory = $this->getRealInventory();
 				/** @var CompoundTag $itemNBT */
 				foreach ($inventoryTag as $itemNBT) {
-					$id = $itemNBT->getValue()["id"]->getValue();
-					if ($id === ItemTypeIds::POTION || $id === ItemTypeIds::SPLASH_POTION) continue;
-					$inventory->setItem($itemNBT->getByte("Slot"), Item::nbtDeserialize($itemNBT));
+					$slot = $itemNBT->getByte(SavedItemStackData::TAG_SLOT);
+					$item = Item::safeNbtDeserialize($itemNBT, "KygekPotionDisabler chest slot {$slot}");
+					if ($item->getTypeId() === ItemTypeIds::POTION || $item->getTypeId() === ItemTypeIds::SPLASH_POTION) continue;
+					$inventory->setItem($slot, $item);
 				}
 			}
 		}
