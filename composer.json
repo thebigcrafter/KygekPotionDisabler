@@ -12,7 +12,7 @@
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.17",
         "phpstan/phpstan": "^2.1",
-        "axolotl-pm/pocketmine-mp": "dev-stable"
+        "axolotl-pm/pocketmine-mp": "5.49.1"
     },
     "require": {},
     "scripts": {
