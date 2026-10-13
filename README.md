@@ -36,6 +36,8 @@ composer install
 composer run analyse
 ```
 
+The GitHub Actions build workflow uses [DevTools](https://github.com/NhanAZ/DevTools) to build and validate the plugin PHAR. Its pinned CI inputs remain in the workflow for reproducible builds.
+
 Before using a build on a server, verify creative inventory contents, potion
 crafting, `/give` handling and chest loading in an isolated API 5 test server.
 Do not test by changing a production world or its plugin data.
