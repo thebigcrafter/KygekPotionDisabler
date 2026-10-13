@@ -56,8 +56,7 @@ class PotionDisabler extends PluginBase implements Listener {
 		$this->removePotionCrafting("shapelessRecipes");
 		$this->removePotionCraftingIndex();
 
-		$tileFactory = new TileFactory();
-		$tileFactory->register(Chest::class, ["Chest", "Large Chest"]);
+		TileFactory::getInstance()->register(Chest::class, ["Chest", "Large Chest"]);
 	}
 
 	public function onGiveCommand(CommandEvent $event) : void {
