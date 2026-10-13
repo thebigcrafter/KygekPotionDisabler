@@ -54,6 +54,7 @@ class PotionDisabler extends PluginBase implements Listener {
 
 		$this->removePotionCrafting("shapedRecipes");
 		$this->removePotionCrafting("shapelessRecipes");
+		$this->removePotionCraftingIndex();
 
 		$tileFactory = new TileFactory();
 		$tileFactory->register(Chest::class, ["Chest", "Large Chest"]);
@@ -96,9 +97,10 @@ class PotionDisabler extends PluginBase implements Listener {
 	 * @throws ReflectionException
 	 */
 	private function removePotionCrafting(string $property) : void {
+		$craftingManager = $this->getServer()->getCraftingManager();
 		$reflection = new ReflectionProperty(CraftingManager::class, $property);
 		$reflection->setAccessible(true);
-		$recipes = $reflection->getValue(new CraftingManager());
+		$recipes = $reflection->getValue($craftingManager);
 		if (!is_array($recipes)) {
 			return;
 		}
@@ -107,26 +109,49 @@ class PotionDisabler extends PluginBase implements Listener {
 				$value = [];
 				return;
 			}
-			$value = array_filter($value, static function (mixed $recipe) : bool {
-				if (!$recipe instanceof CraftingRecipe) {
-					return true;
-				}
-				foreach ($recipe->getIngredientList() as $ingredient) {
-					if ($ingredient instanceof Potion || $ingredient instanceof SplashPotion)
-						return false;
-				}
-				$results = match (true) {
-					$recipe instanceof ShapedRecipe => $recipe->getResults(),
-					$recipe instanceof ShapelessRecipe => $recipe->getResults(),
-					default => []
-				};
-				foreach ($results as $result) {
-					if ($result instanceof Potion || $result instanceof SplashPotion)
-						return false;
-				}
-				return true;
-			});
+			$value = array_filter($value, static fn (mixed $recipe) : bool => !self::isPotionRecipe($recipe));
 		});
-		$reflection->setValue(new CraftingManager(), $recipes);
+		$reflection->setValue($craftingManager, $recipes);
+	}
+
+	/**
+	 * Removes potion recipes from the index used to build the client's crafting data cache.
+	 *
+	 * @throws ReflectionException
+	 */
+	private function removePotionCraftingIndex() : void {
+		$craftingManager = $this->getServer()->getCraftingManager();
+		$reflection = new ReflectionProperty(CraftingManager::class, "craftingRecipeIndex");
+		$reflection->setAccessible(true);
+		$recipes = $reflection->getValue($craftingManager);
+		if (!is_array($recipes)) {
+			return;
+		}
+		$reflection->setValue($craftingManager, array_filter(
+			$recipes,
+			static fn (mixed $recipe) : bool => !self::isPotionRecipe($recipe)
+		));
+	}
+
+	private static function isPotionRecipe(mixed $recipe) : bool {
+		if (!$recipe instanceof CraftingRecipe) {
+			return false;
+		}
+		foreach ($recipe->getIngredientList() as $ingredient) {
+			if ($ingredient instanceof Potion || $ingredient instanceof SplashPotion) {
+				return true;
+			}
+		}
+		$results = match (true) {
+			$recipe instanceof ShapedRecipe => $recipe->getResults(),
+			$recipe instanceof ShapelessRecipe => $recipe->getResults(),
+			default => []
+		};
+		foreach ($results as $result) {
+			if ($result instanceof Potion || $result instanceof SplashPotion) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
