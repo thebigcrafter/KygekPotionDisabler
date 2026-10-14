@@ -20,12 +20,12 @@ use pocketmine\crafting\CraftingManager;
 use pocketmine\crafting\CraftingRecipe;
 use pocketmine\crafting\ShapedRecipe;
 use pocketmine\crafting\ShapelessRecipe;
-use pocketmine\data\bedrock\PotionTypeIdMap;
 use pocketmine\event\Listener;
 use pocketmine\event\server\CommandEvent;
 use pocketmine\inventory\CreativeInventory;
 use pocketmine\item\ItemTypeIds;
 use pocketmine\item\Potion;
+use pocketmine\item\PotionType;
 use pocketmine\item\SplashPotion;
 use pocketmine\item\VanillaItems;
 use pocketmine\lang\Translatable;
@@ -53,8 +53,6 @@ use function str_ends_with;
 use function strtolower;
 
 class PotionDisabler extends PluginBase implements Listener {
-	private const HIGHEST_META = 42;
-
 	/**
 	 * @throws ReflectionException
 	 */
@@ -96,14 +94,9 @@ class PotionDisabler extends PluginBase implements Listener {
 	private function removePotionFromCreativeInventory() : void {
 		$creativeInv = CreativeInventory::getInstance();
 
-		$meta = 0;
-		while ($meta <= self::HIGHEST_META) {
-			$potionType = PotionTypeIdMap::getInstance()->fromId($meta);
-			if ($potionType !== null) {
-				$creativeInv->remove(VanillaItems::POTION()->setType($potionType));
-				$creativeInv->remove(VanillaItems::SPLASH_POTION()->setType($potionType));
-			}
-			$meta++;
+		foreach (PotionType::cases() as $potionType) {
+			$creativeInv->remove(VanillaItems::POTION()->setType($potionType));
+			$creativeInv->remove(VanillaItems::SPLASH_POTION()->setType($potionType));
 		}
 	}
 
