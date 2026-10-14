@@ -29,17 +29,28 @@ use pocketmine\item\Potion;
 use pocketmine\item\SplashPotion;
 use pocketmine\item\VanillaItems;
 use pocketmine\lang\Translatable;
+use pocketmine\nbt\NBT;
+use pocketmine\nbt\tag\CompoundTag;
+use pocketmine\nbt\tag\ListTag;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\TextFormat;
 use ReflectionException;
 use ReflectionProperty;
 use function array_filter;
 use function array_walk;
+use function array_values;
+use function basename;
+use function count;
 use function explode;
 use function in_array;
+use function is_dir;
 use function is_array;
+use function is_file;
 use function mb_strtolower;
+use function scandir;
 use function str_ireplace;
+use function str_ends_with;
+use function strtolower;
 
 class PotionDisabler extends PluginBase implements Listener {
 	private const HIGHEST_META = 42;
@@ -51,6 +62,10 @@ class PotionDisabler extends PluginBase implements Listener {
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 
 		$this->removePotionFromCreativeInventory();
+		$removedItems = $this->removePotionFromOfflinePlayerData();
+		if ($removedItems > 0) {
+			$this->getLogger()->notice("Removed {$removedItems} potion item(s) from offline player data");
+		}
 
 		$this->removePotionCrafting("shapedRecipes");
 		$this->removePotionCrafting("shapelessRecipes");
@@ -90,6 +105,81 @@ class PotionDisabler extends PluginBase implements Listener {
 			}
 			$meta++;
 		}
+	}
+
+	/**
+	 * Removes default potion items from saved players before they can re-enter the server.
+	 *
+	 * Online player files are skipped so a plugin reload cannot overwrite an active
+	 * player's in-memory inventory with an older saved snapshot.
+	 */
+	private function removePotionFromOfflinePlayerData() : int {
+		$playerDataPath = $this->getServer()->getDataPath() . "players";
+		if (!is_dir($playerDataPath)) {
+			return 0;
+		}
+
+		$onlinePlayers = [];
+		foreach ($this->getServer()->getOnlinePlayers() as $player) {
+			$onlinePlayers[strtolower($player->getName())] = true;
+		}
+
+		$removedItems = 0;
+		foreach (scandir($playerDataPath) ?: [] as $file) {
+			if ($file === "." || $file === ".." || !str_ends_with($file, ".dat")) {
+				continue;
+			}
+
+			$playerName = basename($file, ".dat");
+			if (isset($onlinePlayers[strtolower($playerName)]) || !is_file($playerDataPath . DIRECTORY_SEPARATOR . $file)) {
+				continue;
+			}
+
+			$playerData = $this->getServer()->getOfflinePlayerData($playerName);
+			if ($playerData === null) {
+				continue;
+			}
+
+			$changed = false;
+			foreach (["Inventory", "EnderChestInventory"] as $inventoryName) {
+				$inventoryTag = $playerData->getTag($inventoryName);
+				if (!$inventoryTag instanceof ListTag) {
+					continue;
+				}
+
+				$compoundInventoryTag = $inventoryTag->cast(CompoundTag::class);
+				if ($compoundInventoryTag === null) {
+					continue;
+				}
+
+				$originalItems = $compoundInventoryTag->getValue();
+				$filteredItems = array_filter(
+					$originalItems,
+					static function(CompoundTag $item) : bool {
+						$name = strtolower($item->getString("Name", ""));
+						if ($name === "minecraft:potion" || $name === "minecraft:splash_potion") {
+							return false;
+						}
+
+						$legacyId = $item->getInt("id", -1);
+						return $legacyId !== ItemTypeIds::POTION && $legacyId !== ItemTypeIds::SPLASH_POTION;
+					}
+				);
+				if (count($filteredItems) === count($originalItems)) {
+					continue;
+				}
+
+				$playerData->setTag($inventoryName, new ListTag(array_values($filteredItems), NBT::TAG_Compound));
+				$removedItems += count($originalItems) - count($filteredItems);
+				$changed = true;
+			}
+
+			if ($changed) {
+				$this->getServer()->saveOfflinePlayerData($playerName, $playerData);
+			}
+		}
+
+		return $removedItems;
 	}
 
 	/**
