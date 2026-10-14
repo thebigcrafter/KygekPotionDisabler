@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build and validate plugin
+    name: Build and validate KygekPotionDisabler plugin
     uses: NhanAZ/DevTools/.github/workflows/build-plugin.yml@3dedda2a1f6e42885aa680aaadeebacbc0f62733
     with:
       axolotl-ref: dfe0d07e48a9e8d5a4a242fa43ff1cd3b743a955
