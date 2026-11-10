@@ -37,7 +37,7 @@ composer install
 composer run analyse
 ```
 
-The GitHub Actions build workflow uses [DevTools](https://github.com/AxolotlBucketLabs/DevTools) to build and validate the plugin PHAR. Its pinned CI inputs remain in the workflow for reproducible builds.
+The GitHub Actions build workflow uses [DevTools](https://github.com/AxolotlBucketLabs/DevTools) to build and validate the plugin PHAR. Its required dependency and workflow inputs remain in the workflow, while DevTools uses the maintained latest channel.
 
 Before using a build on a server, verify creative inventory contents, potion
 crafting, `/give` handling and chest loading in an isolated API 5 test server.
